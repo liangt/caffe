@@ -40,6 +40,20 @@ message Datum {
   optional bool encoded = 7 [default = false];
 }
 
+message MultilabelDatum {
+  optional int32 channels = 1;
+  optional int32 height = 2;
+  optional int32 width = 3;
+  // the actual image data, in bytes
+  optional bytes data = 4;
+  repeated int32 label = 5;
+  optional int32 label_num = 6;
+  // Optionally, the datum could also hold float data.
+  repeated float float_data = 7;
+  // If true data contains an encoded image that need to be decoded
+  optional bool encoded = 8 [default = false];
+}
+
 message FillerParameter {
   // The filler type.
   optional string type = 1 [default = 'constant'];
@@ -308,7 +322,7 @@ message ParamSpec {
 // NOTE
 // Update the next available ID when you add a new LayerParameter field.
 //
-// LayerParameter next available layer-specific ID: 147 (last added: recurrent_param)
+// LayerParameter next available layer-specific ID: 148 (last added: recurrent_param)
 message LayerParameter {
   optional string name = 1; // the layer name
   optional string type = 2; // the layer type
@@ -386,6 +400,7 @@ message LayerParameter {
   optional LogParameter log_param = 134;
   optional LRNParameter lrn_param = 118;
   optional MemoryDataParameter memory_data_param = 119;
+  optional MultilabelDataParameter multilabel_data_param = 148;
   optional MVNParameter mvn_param = 120;
   optional ParameterParameter parameter_param = 145;
   optional PoolingParameter pooling_param = 121;
@@ -877,6 +892,26 @@ message MemoryDataParameter {
   optional uint32 channels = 2;
   optional uint32 height = 3;
   optional uint32 width = 4;
+}
+
+message MultilabelDataParameter {
+  enum DB {
+    LEVELDB = 0;
+    LMDB = 1;
+  }
+  // Specify the data source.
+  optional string source = 1;
+  // Specify the batch size.
+  optional uint32 batch_size = 2;
+  //Specify the label size.
+  optional uint32 label_size = 3;
+  // Specify the database backend.
+  optional DB backend = 4 [default = LEVELDB];
+  // Force the encoded image to have 3 color channels
+  optional bool force_encoded_color = 5 [default = false];
+  // Prefetch queue (Increase if data feeding bandwidth varies, within the
+  // limit of device memory for GPU training)
+  optional uint32 prefetch = 6 [default = 4];
 }
 
 message MVNParameter {

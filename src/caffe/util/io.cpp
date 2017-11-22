@@ -155,14 +155,14 @@ bool ReadImageToMultilabelDatum(const string& filename, const vector<int>& label
       datum->set_data(std::string(reinterpret_cast<char*>(&buf[0]),
                       buf.size()));
       for (int i = 0; i < label.size(); i++)
-        datum->add_label(label);
+        datum->add_label(label[i]);
       datum->set_label_num(label_num);
       datum->set_encoded(true);
       return true;
     }
     CVMatToMultilabelDatum(cv_img, datum);
     for (int i = 0; i < label.size(); i++)
-      datum->add_label(label);
+      datum->add_label(label[i]);
     datum->set_label_num(label_num);
     return true;
   } else {
@@ -191,7 +191,7 @@ bool ReadFileToDatum(const string& filename, const int label,
   }
 }
 
-bool ReadFileToMultilabelDatum(const string& filename, const <vector<int>& label,
+bool ReadFileToMultilabelDatum(const string& filename, const vector<int>& label,
   const int label_num, MultilabelDatum* datum) {
   std::streampos size;
 
@@ -204,7 +204,7 @@ bool ReadFileToMultilabelDatum(const string& filename, const <vector<int>& label
     file.close();
     datum->set_data(buffer);
     for (int i = 0; i < label.size(); i++)
-      datum->add_label(label);
+      datum->add_label(label[i]);
     datum->set_label_num(label_num);
     datum->set_encoded(true);
     return true;

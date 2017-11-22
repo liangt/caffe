@@ -96,7 +96,7 @@ inline bool ReadFileToDatum(const string& filename, Datum* datum) {
   return ReadFileToDatum(filename, -1, datum);
 }
 
-bool ReadFileToMultilabelDatum(const string& filename, const vector<int>& label, const int label_num, MultilabelDatum* datum);
+bool ReadFileToMultilabelDatum(const string& filename, const vector<int>& label, MultilabelDatum* datum);
 
 bool ReadImageToDatum(const string& filename, const int label,
     const int height, const int width, const bool is_color,
@@ -128,7 +128,7 @@ inline bool ReadImageToDatum(const string& filename, const int label,
   return ReadImageToDatum(filename, label, 0, 0, true, encoding, datum);
 }
 
-bool ReadImageToMultilabelDatum(const string& filename, const vector<int>& label, const int label_num,
+bool ReadImageToMultilabelDatum(const string& filename, const vector<int>& label,
   const int height, const int width, const bool is_color,
   const std::string & encoding, MultilabelDatum* datum);
 

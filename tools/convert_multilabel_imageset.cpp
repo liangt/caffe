@@ -34,8 +34,6 @@ DEFINE_bool(shuffle, false,
     "Randomly shuffle the order of images and their labels");
 DEFINE_string(backend, "lmdb",
         "The backend {lmdb, leveldb} for storing the result");
-DEFINE_int32(label_num, 0,
-        "Number of labels");
 DEFINE_int32(resize_width, 0, "Width images are resized to");
 DEFINE_int32(resize_height, 0, "Height images are resized to");
 DEFINE_bool(check_size, false,
@@ -74,9 +72,6 @@ int main(int argc, char** argv) {
   const bool check_size = FLAGS_check_size;
   const bool encoded = FLAGS_encoded;
   const string encode_type = FLAGS_encode_type;
-  const int label_num = FLAGS_label_num;
-  if(label_num == 0)
-    LOG(FATAL) << "Number of labels must be set.";
 
   std::ifstream infile(argv[1]);
   std::vector<std::pair<std::string, std::vector<int> > > lines;
@@ -134,7 +129,7 @@ int main(int argc, char** argv) {
       std::transform(enc.begin(), enc.end(), enc.begin(), ::tolower);
     }
     status = ReadImageToMultilabelDatum(root_folder + lines[line_id].first,
-        lines[line_id].second, label_num, resize_height, resize_width, is_color,
+        lines[line_id].second, resize_height, resize_width, is_color,
         enc, &datum);
     if (status == false) continue;
     if (check_size) {

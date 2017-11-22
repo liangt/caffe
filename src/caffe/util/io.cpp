@@ -149,7 +149,7 @@ bool ReadImageToMultilabelDatum(const string& filename, const vector<int>& label
     if (encoding.size()) {
       if ( (cv_img.channels() == 3) == is_color && !height && !width &&
           matchExt(filename, encoding) )
-        return ReadFileToMultilabelDatum(filename, label, label_num, datum);
+        return ReadFileToMultilabelDatum(filename, label, datum);
       std::vector<uchar> buf;
       cv::imencode("."+encoding, cv_img, buf);
       datum->set_data(std::string(reinterpret_cast<char*>(&buf[0]),

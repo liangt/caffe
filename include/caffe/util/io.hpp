@@ -96,7 +96,7 @@ inline bool ReadFileToDatum(const string& filename, Datum* datum) {
   return ReadFileToDatum(filename, -1, datum);
 }
 
-bool ReadFileToMultilabelDatum(const string& filename, const vector<int>& label, MultilabelDatum* datum);
+bool ReadFileToDatum(const string& filename, const vector<int>& label, MultilabelDatum* datum);
 
 bool ReadImageToDatum(const string& filename, const int label,
     const int height, const int width, const bool is_color,
@@ -128,7 +128,7 @@ inline bool ReadImageToDatum(const string& filename, const int label,
   return ReadImageToDatum(filename, label, 0, 0, true, encoding, datum);
 }
 
-bool ReadImageToMultilabelDatum(const string& filename, const vector<int>& label,
+bool ReadImageToDatum(const string& filename, const vector<int>& label,
   const int height, const int width, const bool is_color,
   const std::string & encoding, MultilabelDatum* datum);
 
@@ -154,8 +154,7 @@ cv::Mat DecodeDatumToCVMatNative(const MultilabelDatum& datum);
 cv::Mat DecodeDatumToCVMat(const MultilabelDatum& datum, bool is_color);
 
 void CVMatToDatum(const cv::Mat& cv_img, Datum* datum);
-
-void CVMatToMultilabelDatum(const cv::Mat& cv_img, MultilabelDatum* datum);
+void CVMatToDatum(const cv::Mat& cv_img, MultilabelDatum* datum);
 #endif  // USE_OPENCV
 
 }  // namespace caffe

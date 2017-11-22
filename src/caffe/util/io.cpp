@@ -149,7 +149,7 @@ bool ReadImageToMultilabelDatum(const string& filename, const vector<int>& label
     if (encoding.size()) {
       if ( (cv_img.channels() == 3) == is_color && !height && !width &&
           matchExt(filename, encoding) )
-        return ReadFileToMultilabelDatum(filename, label, datum);
+        return ReadFileToMultilabelDatum(filename, label, label_num, datum);
       std::vector<uchar> buf;
       cv::imencode("."+encoding, cv_img, buf);
       datum->set_data(std::string(reinterpret_cast<char*>(&buf[0]),
@@ -286,7 +286,7 @@ void CVMatToDatum(const cv::Mat& cv_img, Datum* datum) {
   datum->set_data(buffer);
 }
 
-void CVMatToDatum(const cv::Mat& cv_img, MultilabelDatum* datum) {
+void CVMatToMultilabelDatum(const cv::Mat& cv_img, MultilabelDatum* datum) {
   CHECK(cv_img.depth() == CV_8U) << "Image data type must be unsigned byte";
   datum->set_channels(cv_img.channels());
   datum->set_height(cv_img.rows);

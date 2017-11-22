@@ -15,8 +15,8 @@ template <typename Dtype>
 MultilabelDataLayer<Dtype>::MultilabelDataLayer(const LayerParameter& param)
   : BasePrefetchingDataLayer<Dtype>(param),
     offset_() {
-  db_.reset(db::GetDB(param.data_param().backend()));
-  db_->Open(param.data_param().source(), db::READ);
+  db_.reset(db::GetDB(param.multilabel_data_param().backend()));
+  db_->Open(param.multilabel_data_param().source(), db::READ);
   cursor_.reset(db_->NewCursor());
 }
 

@@ -121,9 +121,10 @@ void MultilabelDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {
     // Copy label.
     if (this->output_labels_) {
       Dtype* top_label = batch->label_.mutable_cpu_data();
-      caffe_set<Dtype>(label_size, Dtype(0), top_label[item_id]);
+      offset = batch->label_.offset(item_id);
+      caffe_set<Dtype>(label_size, Dtype(0), top_label + offset);
       for (int i = 0; i < datum.label_size(); i++){
-        top_label[item_id][datum.label(i)] = Dtype(1);
+        top_label[offset + datum.label(i)] = Dtype(1);
       }
     }
     trans_time += timer.MicroSeconds();

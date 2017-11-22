@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
   // Storing to db
   std::string root_folder = FLAGS_root_dir;
   int root_folder_n = root_folder.size()
-  if(root_folder_n != 0 && root_folder[root_folder_n] != '/')
+  if(root_folder_n != 0 && root_folder[root_folder_n-1] != '/')
     root_folder += "/";
   MultilabelDatum datum;
   int count = 0;

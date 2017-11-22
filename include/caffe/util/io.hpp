@@ -150,6 +150,9 @@ cv::Mat ReadImageToCVMat(const string& filename);
 cv::Mat DecodeDatumToCVMatNative(const Datum& datum);
 cv::Mat DecodeDatumToCVMat(const Datum& datum, bool is_color);
 
+cv::Mat DecodeDatumToCVMatNative(const MultilabelDatum& datum);
+cv::Mat DecodeDatumToCVMat(const MultilabelDatum& datum, bool is_color);
+
 void CVMatToDatum(const cv::Mat& cv_img, Datum* datum);
 
 void CVMatToMultilabelDatum(const cv::Mat& cv_img, MultilabelDatum* datum);

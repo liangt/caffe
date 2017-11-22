@@ -36,7 +36,7 @@ class DataTransformer {
    *    set_cpu_data() is used. See data_layer.cpp for an example.
    */
   void Transform(const Datum& datum, Blob<Dtype>* transformed_blob);
-  // void Transform(const MultilabelDatum& datum, Blob<Dtype>* transformed_blob);
+  void Transform(const MultilabelDatum& datum, Blob<Dtype>* transformed_blob);
 
   /**
    * @brief Applies the transformation defined in the data layer's

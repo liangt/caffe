@@ -269,6 +269,60 @@ void DataTransformer<Dtype>::Transform(const Datum& datum,
 }
 
 template<typename Dtype>
+void DataTransformer<Dtype>::Transform(const MultilabelDatum& datum,
+                                       Blob<Dtype>* transformed_blob) {
+  // If datum is encoded, decode and transform the cv::image.
+  if (datum.encoded()) {
+#ifdef USE_OPENCV
+    CHECK(!(param_.force_color() && param_.force_gray()))
+        << "cannot set both force_color and force_gray";
+    cv::Mat cv_img;
+    if (param_.force_color() || param_.force_gray()) {
+    // If force_color then decode in color otherwise decode in gray.
+      cv_img = DecodeDatumToCVMat(datum, param_.force_color());
+    } else {
+      cv_img = DecodeDatumToCVMatNative(datum);
+    }
+    // Transform the cv::image into blob.
+    return Transform(cv_img, transformed_blob);
+#else
+    LOG(FATAL) << "Encoded datum requires OpenCV; compile with USE_OPENCV.";
+#endif  // USE_OPENCV
+  } else {
+    if (param_.force_color() || param_.force_gray()) {
+      LOG(ERROR) << "force_color and force_gray only for encoded datum";
+    }
+  }
+
+  const int crop_size = param_.crop_size();
+  const int datum_channels = datum.channels();
+  const int datum_height = datum.height();
+  const int datum_width = datum.width();
+
+  // Check dimensions.
+  const int channels = transformed_blob->channels();
+  const int height = transformed_blob->height();
+  const int width = transformed_blob->width();
+  const int num = transformed_blob->num();
+
+  CHECK_EQ(channels, datum_channels);
+  CHECK_LE(height, datum_height);
+  CHECK_LE(width, datum_width);
+  CHECK_GE(num, 1);
+
+  if (crop_size) {
+    CHECK_EQ(crop_size, height);
+    CHECK_EQ(crop_size, width);
+  } else {
+    CHECK_EQ(datum_height, height);
+    CHECK_EQ(datum_width, width);
+  }
+
+  Dtype* transformed_data = transformed_blob->mutable_cpu_data();
+  Transform(datum, transformed_data);
+}
+
+template<typename Dtype>
 void DataTransformer<Dtype>::Transform(const vector<Datum> & datum_vector,
                                        Blob<Dtype>* transformed_blob) {
   const int datum_num = datum_vector.size();

@@ -141,7 +141,7 @@ bool ReadImageToDatum(const string& filename, const int label,
   }
 }
 
-bool ReadImageToMultilabelDatum(const string& filename, const vector<int>& label,
+bool ReadImageToDatum(const string& filename, const vector<int>& label,
    const int height, const int width, const bool is_color,
    const std::string & encoding, MultilabelDatum* datum) {
   cv::Mat cv_img = ReadImageToCVMat(filename, height, width, is_color);
@@ -149,7 +149,7 @@ bool ReadImageToMultilabelDatum(const string& filename, const vector<int>& label
     if (encoding.size()) {
       if ( (cv_img.channels() == 3) == is_color && !height && !width &&
           matchExt(filename, encoding) )
-        return ReadFileToMultilabelDatum(filename, label, datum);
+        return ReadFileToDatum(filename, label, datum);
       std::vector<uchar> buf;
       cv::imencode("."+encoding, cv_img, buf);
       datum->set_data(std::string(reinterpret_cast<char*>(&buf[0]),
@@ -159,7 +159,7 @@ bool ReadImageToMultilabelDatum(const string& filename, const vector<int>& label
       datum->set_encoded(true);
       return true;
     }
-    CVMatToMultilabelDatum(cv_img, datum);
+    CVMatToDatum(cv_img, datum);
     for (int i = 0; i < label.size(); i++)
       datum->add_label(label[i]);
     return true;
@@ -189,7 +189,7 @@ bool ReadFileToDatum(const string& filename, const int label,
   }
 }
 
-bool ReadFileToMultilabelDatum(const string& filename, const vector<int>& label,
+bool ReadFileToDatum(const string& filename, const vector<int>& label,
   MultilabelDatum* datum) {
   std::streampos size;
 
@@ -222,7 +222,31 @@ cv::Mat DecodeDatumToCVMatNative(const Datum& datum) {
   }
   return cv_img;
 }
+cv::Mat DecodeDatumToCVMatNative(const MultilabelDatum& datum) {
+  cv::Mat cv_img;
+  CHECK(datum.encoded()) << "Datum not encoded";
+  const string& data = datum.data();
+  std::vector<char> vec_data(data.c_str(), data.c_str() + data.size());
+  cv_img = cv::imdecode(vec_data, -1);
+  if (!cv_img.data) {
+    LOG(ERROR) << "Could not decode datum ";
+  }
+  return cv_img;
+}
 cv::Mat DecodeDatumToCVMat(const Datum& datum, bool is_color) {
+  cv::Mat cv_img;
+  CHECK(datum.encoded()) << "Datum not encoded";
+  const string& data = datum.data();
+  std::vector<char> vec_data(data.c_str(), data.c_str() + data.size());
+  int cv_read_flag = (is_color ? CV_LOAD_IMAGE_COLOR :
+    CV_LOAD_IMAGE_GRAYSCALE);
+  cv_img = cv::imdecode(vec_data, cv_read_flag);
+  if (!cv_img.data) {
+    LOG(ERROR) << "Could not decode datum ";
+  }
+  return cv_img;
+}
+cv::Mat DecodeDatumToCVMat(const MultilabelDatum& datum, bool is_color) {
   cv::Mat cv_img;
   CHECK(datum.encoded()) << "Datum not encoded";
   const string& data = datum.data();
@@ -247,7 +271,25 @@ bool DecodeDatumNative(Datum* datum) {
     return false;
   }
 }
+bool DecodeDatumNative(MultilabelDatum* datum) {
+  if (datum->encoded()) {
+    cv::Mat cv_img = DecodeDatumToCVMatNative((*datum));
+    CVMatToDatum(cv_img, datum);
+    return true;
+  } else {
+    return false;
+  }
+}
 bool DecodeDatum(Datum* datum, bool is_color) {
+  if (datum->encoded()) {
+    cv::Mat cv_img = DecodeDatumToCVMat((*datum), is_color);
+    CVMatToDatum(cv_img, datum);
+    return true;
+  } else {
+    return false;
+  }
+}
+bool DecodeDatum(MultilabelDatum* datum, bool is_color) {
   if (datum->encoded()) {
     cv::Mat cv_img = DecodeDatumToCVMat((*datum), is_color);
     CVMatToDatum(cv_img, datum);
@@ -283,7 +325,7 @@ void CVMatToDatum(const cv::Mat& cv_img, Datum* datum) {
   datum->set_data(buffer);
 }
 
-void CVMatToMultilabelDatum(const cv::Mat& cv_img, MultilabelDatum* datum) {
+void CVMatToDatum(const cv::Mat& cv_img, MultilabelDatum* datum) {
   CHECK(cv_img.depth() == CV_8U) << "Image data type must be unsigned byte";
   datum->set_channels(cv_img.channels());
   datum->set_height(cv_img.rows);

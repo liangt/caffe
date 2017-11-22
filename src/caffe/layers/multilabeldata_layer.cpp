@@ -89,8 +89,8 @@ void MultilabelDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {
   CPUTimer timer;
   CHECK(batch->data_.count());
   CHECK(this->transformed_data_.count());
-  const int batch_size = this->layer_param_.data_param().batch_size();
-  const int label_size = this->layer_param_.data_param().label_size();
+  const int batch_size = this->layer_param_.multilabel_data_param().batch_size();
+  const int label_size = this->layer_param_.multilabel_data_param().label_size();
 
   MultilabelDatum datum;
   for (int item_id = 0; item_id < batch_size; ++item_id) {

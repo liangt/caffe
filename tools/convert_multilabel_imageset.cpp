@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "boost/scoped_ptr.hpp"
+#include "boost/algorithm/string.hpp"
 #include "gflags/gflags.h"
 #include "glog/logging.h"
 
@@ -82,7 +83,8 @@ int main(int argc, char** argv) {
 
     std::vector<int> vec_label;
     std::vector<std::string> tokens;
-    split(tokens, line.substr(pos + 1), is_any_of(" "));
+    std::string labels = line.substr(pos + 1);
+    boost::split(tokens, labels, boost::is_any_of(","));
     for(int i = 0; i < tokens.size(); i++){
         vec_label.push_back(atoi(tokens[i].c_str()));
     }

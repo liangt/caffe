@@ -140,6 +140,35 @@ bool ReadImageToDatum(const string& filename, const int label,
     return false;
   }
 }
+
+bool ReadImageToMultilabelDatum(const string& filename, const vector<int>& label, const int label_num,
+   const int height, const int width, const bool is_color,
+   const std::string & encoding, MultilabelDatum* datum) {
+  cv::Mat cv_img = ReadImageToCVMat(filename, height, width, is_color);
+  if (cv_img.data) {
+    if (encoding.size()) {
+      if ( (cv_img.channels() == 3) == is_color && !height && !width &&
+          matchExt(filename, encoding) )
+        return ReadFileToMultilabelDatum(filename, label, datum);
+      std::vector<uchar> buf;
+      cv::imencode("."+encoding, cv_img, buf);
+      datum->set_data(std::string(reinterpret_cast<char*>(&buf[0]),
+                      buf.size()));
+      for (int i = 0; i < label.size(); i++)
+        datum->add_label(label);
+      datum->set_label_num(label_num);
+      datum->set_encoded(true);
+      return true;
+    }
+    CVMatToMultilabelDatum(cv_img, datum);
+    for (int i = 0; i < label.size(); i++)
+      datum->add_label(label);
+    datum->set_label_num(label_num);
+    return true;
+  } else {
+    return false;
+  }
+}
 #endif  // USE_OPENCV
 
 bool ReadFileToDatum(const string& filename, const int label,
@@ -155,6 +184,28 @@ bool ReadFileToDatum(const string& filename, const int label,
     file.close();
     datum->set_data(buffer);
     datum->set_label(label);
+    datum->set_encoded(true);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool ReadFileToMultilabelDatum(const string& filename, const <vector<int>& label,
+  const int label_num, MultilabelDatum* datum) {
+  std::streampos size;
+
+  fstream file(filename.c_str(), ios::in|ios::binary|ios::ate);
+  if (file.is_open()) {
+    size = file.tellg();
+    std::string buffer(size, ' ');
+    file.seekg(0, ios::beg);
+    file.read(&buffer[0], size);
+    file.close();
+    datum->set_data(buffer);
+    for (int i = 0; i < label.size(); i++)
+      datum->add_label(label);
+    datum->set_label_num(label_num);
     datum->set_encoded(true);
     return true;
   } else {
@@ -210,6 +261,32 @@ bool DecodeDatum(Datum* datum, bool is_color) {
 }
 
 void CVMatToDatum(const cv::Mat& cv_img, Datum* datum) {
+  CHECK(cv_img.depth() == CV_8U) << "Image data type must be unsigned byte";
+  datum->set_channels(cv_img.channels());
+  datum->set_height(cv_img.rows);
+  datum->set_width(cv_img.cols);
+  datum->clear_data();
+  datum->clear_float_data();
+  datum->set_encoded(false);
+  int datum_channels = datum->channels();
+  int datum_height = datum->height();
+  int datum_width = datum->width();
+  int datum_size = datum_channels * datum_height * datum_width;
+  std::string buffer(datum_size, ' ');
+  for (int h = 0; h < datum_height; ++h) {
+    const uchar* ptr = cv_img.ptr<uchar>(h);
+    int img_index = 0;
+    for (int w = 0; w < datum_width; ++w) {
+      for (int c = 0; c < datum_channels; ++c) {
+        int datum_index = (c * datum_height + h) * datum_width + w;
+        buffer[datum_index] = static_cast<char>(ptr[img_index++]);
+      }
+    }
+  }
+  datum->set_data(buffer);
+}
+
+void CVMatToDatum(const cv::Mat& cv_img, MultilabelDatum* datum) {
   CHECK(cv_img.depth() == CV_8U) << "Image data type must be unsigned byte";
   datum->set_channels(cv_img.channels());
   datum->set_height(cv_img.rows);

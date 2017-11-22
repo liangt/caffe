@@ -34,6 +34,8 @@ DEFINE_bool(shuffle, false,
     "Randomly shuffle the order of images and their labels");
 DEFINE_string(backend, "lmdb",
         "The backend {lmdb, leveldb} for storing the result");
+DEFINE_int32(label_num, 0,
+        "Number of labels");
 DEFINE_int32(resize_width, 0, "Width images are resized to");
 DEFINE_int32(resize_height, 0, "Height images are resized to");
 DEFINE_bool(check_size, false,
@@ -41,7 +43,7 @@ DEFINE_bool(check_size, false,
 DEFINE_bool(encoded, false,
     "When this option is on, the encoded image will be save in datum");
 DEFINE_string(encode_type, "",
-    "Optional: What type should we encode the image as ('png','jpg',...).");
+    "Optional: What type should we encode the image as ('png','jpg',...)");
 DEFINE_string(root_dir, "",
     "The root directory which contains images.");
 
@@ -72,12 +74,14 @@ int main(int argc, char** argv) {
   const bool check_size = FLAGS_check_size;
   const bool encoded = FLAGS_encoded;
   const string encode_type = FLAGS_encode_type;
+  const int label_num = FLAGS_label_num;
+  if(label_num == 0)
+    LOG(FATAL) << "Number of labels must be set.";
 
   std::ifstream infile(argv[1]);
-  std::vector<std::pair<std::string, int> > lines;
+  std::vector<std::pair<std::string, std::vector<int> > > lines;
   std::string line;
   size_t pos;
-  int label;
   while (std::getline(infile, line)) {
     pos = line.find_last_of(' ');
 
@@ -112,7 +116,7 @@ int main(int argc, char** argv) {
   root_folder_n = root_folder.size()
   if(root_folder_n != 0 && root_folder[root_folder_n] != '/')
     root_folder += "/";
-  Datum datum;
+  MultilabelDatum datum;
   int count = 0;
   int data_size = 0;
   bool data_size_initialized = false;
@@ -129,8 +133,8 @@ int main(int argc, char** argv) {
       enc = fn.substr(p);
       std::transform(enc.begin(), enc.end(), enc.begin(), ::tolower);
     }
-    status = ReadImageToDatum(root_folder + lines[line_id].first,
-        lines[line_id].second, resize_height, resize_width, is_color,
+    status = ReadImageToMultilabelDatum(root_folder + lines[line_id].first,
+        lines[line_id].second, label_num, resize_height, resize_width, is_color,
         enc, &datum);
     if (status == false) continue;
     if (check_size) {

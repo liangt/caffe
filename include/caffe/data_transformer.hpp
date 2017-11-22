@@ -50,8 +50,8 @@ class DataTransformer {
    */
   void Transform(const vector<Datum> & datum_vector,
                 Blob<Dtype>* transformed_blob);
-  // void Transform(const vector<MultilabelDatum> & datum_vector,
-  //               Blob<Dtype>* transformed_blob);
+  void Transform(const vector<MultilabelDatum> & datum_vector,
+                Blob<Dtype>* transformed_blob);
 
 #ifdef USE_OPENCV
   /**

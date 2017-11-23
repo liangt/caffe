@@ -10,6 +10,7 @@ namespace bp = boost::python;
 #include <map>
 #include <string>
 #include <vector>
+#include <fstream>
 
 #include "boost/algorithm/string.hpp"
 #include "caffe/caffe.hpp"
@@ -43,6 +44,8 @@ DEFINE_string(stage, "",
     "separated by ','.");
 DEFINE_string(snapshot, "",
     "Optional; the snapshot solver state to resume training.");
+DEFINE_string(label_score_file, "",
+    "Optional; the file to store label score for each test sample. Only used for 'test'.");
 DEFINE_string(weights, "",
     "Optional; the pretrained weights to initialize finetuning, "
     "separated by ','. Cannot be set simultaneously with snapshot.");
@@ -266,6 +269,19 @@ RegisterBrewFunction(train);
 int test() {
   CHECK_GT(FLAGS_model.size(), 0) << "Need a model definition to score.";
   CHECK_GT(FLAGS_weights.size(), 0) << "Need model weights to score.";
+  bool is_save = false;
+  const string label_score_filename = FLAGS_label_score_file;
+  std::ofstream label_score_file;
+  if(label_score_filename.size() > 0){
+    if(std::ifstream(label_score_filename.c_str())){
+      LOG(FATAL) << "The file " << label_score_filename << " already exists.";
+    }
+    label_score_file.open(label_score_filename.c_str(), std::ios::out | std::ios::app);
+    if(!label_score_file){
+      LOG(FATAL) << "The file "<< label_score_filename <<" can not be created.";
+    }
+    is_save = true;
+  }
   vector<string> stages = get_stages_from_flags();
 
   // Set device id and mode
@@ -288,6 +304,30 @@ int test() {
   Net<float> caffe_net(FLAGS_model, caffe::TEST, FLAGS_level, &stages);
   caffe_net.CopyTrainedLayersFrom(FLAGS_weights);
   LOG(INFO) << "Running for " << FLAGS_iterations << " iterations.";
+
+  // output label score
+  if(is_save){
+    for (int i = 0; i < FLAGS_iterations; i++){
+      const vector<Blob<float>*>& result = caffe_net.Forward();
+      if (result.size() > 1){
+        LOG(FATAL) << "The last layer has more than 1 output blob.";
+      }
+      const int num = result[0]->num();
+      const int label_size = result[0]->channels();
+      float* result_vec = result[0]->cpu_data();
+      for (int j = 0; j < num; j++){
+        label_score_file << result_vec[0];
+        for (int k = 1; k < label_size; k++){
+          label_score_file << ' ' << result_vec[k];
+        }
+        label_score_file << '\n';
+        label_score_file.close();
+        result_vec += label_size;
+      }
+    }
+    LOG(INFO) << "label score is saved to " << label_score_filename;
+    return 0;
+  }
 
   vector<int> test_score_output_id;
   vector<float> test_score;

@@ -1,10 +1,9 @@
 // This program converts a set of images to a lmdb/leveldb by storing them
-// as Datum proto buffers.
+// as MultilabelDatum proto buffers.
 // Usage:
 //   convert_multilabel_imageset [FLAGS] LISTFILE DB_NAME
 //
-// where ROOTFOLDER is the root folder that holds all the images, and LISTFILE
-// should be a list of files as well as their labels, in the format as
+// where LISTFILE should be a list of files as well as their labels, in the format as
 //   subfolder1/file1.JPEG 2,5,8
 //   ....
 

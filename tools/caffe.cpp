@@ -313,12 +313,21 @@ int test() {
         LOG(FATAL) << "The last layer has more than 1 output blob.";
       }
       const int num = result[0]->num();
-      const int label_size = result[0]->channels();
+      const int label_size = result[0]->channels() / 2;
       const float* result_vec = result[0]->cpu_data();
       for (int j = 0; j < num; j++){
+        // ground truth
         label_score_file << result_vec[0];
         for (int k = 1; k < label_size; k++){
-          label_score_file << ' ' << result_vec[k];
+          label_score_file << ',' << result_vec[k];
+        }
+        label_score_file << ' ';
+        result_vec += label_size;
+
+        // predict
+        label_score_file << result_vec[0];
+        for (int k = 1; k < label_size; k++){
+          label_score_file << ',' << result_vec[k];
         }
         label_score_file << '\n';
         result_vec += label_size;

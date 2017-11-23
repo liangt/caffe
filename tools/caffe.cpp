@@ -314,7 +314,7 @@ int test() {
       }
       const int num = result[0]->num();
       const int label_size = result[0]->channels();
-      float* result_vec = result[0]->cpu_data();
+      const float* result_vec = result[0]->cpu_data();
       for (int j = 0; j < num; j++){
         label_score_file << result_vec[0];
         for (int k = 1; k < label_size; k++){

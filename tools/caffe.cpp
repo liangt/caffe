@@ -321,10 +321,10 @@ int test() {
           label_score_file << ' ' << result_vec[k];
         }
         label_score_file << '\n';
-        label_score_file.close();
         result_vec += label_size;
       }
     }
+    label_score_file.close();
     LOG(INFO) << "label score is saved to " << label_score_filename;
     return 0;
   }

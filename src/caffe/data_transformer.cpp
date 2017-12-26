@@ -283,6 +283,12 @@ void DataTransformer<Dtype>::Transform(const MultilabelDatum& datum,
     } else {
       cv_img = DecodeDatumToCVMatNative(datum);
     }
+    
+    // Distort the image.
+    if(param_.has_distort_param()){
+      cv::Mat distort_img = ApplyDistort(cv_img, param_.distort_param());
+    }
+
     // Transform the cv::image into blob.
     return Transform(cv_img, transformed_blob);
 #else

@@ -22,6 +22,22 @@ DB* GetDB(DataParameter::DB backend) {
   }
 }
 
+DB* GetDB(MultilabelDataParameter::DB backend) {
+  switch (backend) {
+#ifdef USE_LEVELDB
+  case MultilabelDataParameter_DB_LEVELDB:
+    return new LevelDB();
+#endif  // USE_LEVELDB
+#ifdef USE_LMDB
+  case MultilabelDataParameter_DB_LMDB:
+    return new LMDB();
+#endif  // USE_LMDB
+  default:
+    LOG(FATAL) << "Unknown database backend";
+    return NULL;
+  }
+}
+
 DB* GetDB(const string& backend) {
 #ifdef USE_LEVELDB
   if (backend == "leveldb") {

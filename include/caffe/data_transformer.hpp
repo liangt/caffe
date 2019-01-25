@@ -36,6 +36,7 @@ class DataTransformer {
    *    set_cpu_data() is used. See data_layer.cpp for an example.
    */
   void Transform(const Datum& datum, Blob<Dtype>* transformed_blob);
+  void Transform(const MultilabelDatum& datum, Blob<Dtype>* transformed_blob);
 
   /**
    * @brief Applies the transformation defined in the data layer's
@@ -48,6 +49,8 @@ class DataTransformer {
    *    set_cpu_data() is used. See memory_layer.cpp for an example.
    */
   void Transform(const vector<Datum> & datum_vector,
+                Blob<Dtype>* transformed_blob);
+  void Transform(const vector<MultilabelDatum> & datum_vector,
                 Blob<Dtype>* transformed_blob);
 
 #ifdef USE_OPENCV
@@ -98,6 +101,7 @@ class DataTransformer {
    *    Datum containing the data to be transformed.
    */
   vector<int> InferBlobShape(const Datum& datum);
+  vector<int> InferBlobShape(const MultilabelDatum& datum);
   /**
    * @brief Infers the shape of transformed_blob will have when
    *    the transformation is applied to the data.
@@ -107,6 +111,7 @@ class DataTransformer {
    *    A vector of Datum containing the data to be transformed.
    */
   vector<int> InferBlobShape(const vector<Datum> & datum_vector);
+  vector<int> InferBlobShape(const vector<MultilabelDatum> & datum_vector);
   /**
    * @brief Infers the shape of transformed_blob will have when
    *    the transformation is applied to the data.
@@ -139,6 +144,7 @@ class DataTransformer {
   virtual int Rand(int n);
 
   void Transform(const Datum& datum, Dtype* transformed_data);
+  void Transform(const MultilabelDatum& datum, Dtype* transformed_data);
   // Tranformation parameters
   TransformationParameter param_;
 
